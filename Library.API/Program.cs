@@ -11,29 +11,37 @@ builder.Services.AddDbContext<LibraryDB2>(Options=>
 {
     Options.UseSqlServer(builder.Configuration.GetConnectionString("mainDB"));
 });
+builder.Services.AddCors(Options=>{
+    Options.AddDefaultPolicy(policy=>{
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowAnyOrigin();
+    });
+});
 
 var app = builder.Build();
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.MapPost("/book/add",(LibraryDB2 db,Book book)=>
+app.MapPost("/books/add",(LibraryDB2 db,Book book)=>
 {
     db.Books.Add(book);
     db.SaveChanges();
 });
-app.MapPost("/book/list",(LibraryDB2 db)=>
+app.MapGet("/books/list",(LibraryDB2 db)=>
 {
     return db.Books.ToList();
 });
-app.MapPost("/book/update",(LibraryDB2 db,Book book)=>
+app.MapPost("/books/update",(LibraryDB2 db,Book book)=>
 {
     db.Books.Update(book);
     db.SaveChanges();
 });
-app.MapPost("/book/remove/{id}",(LibraryDB2 db,int id)=>
+app.MapPost("/books/remove/{id}",(LibraryDB2 db,int id)=>
 {
     var book=db.Books.Find(id);
     if (book!=null)
